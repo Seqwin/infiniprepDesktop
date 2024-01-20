@@ -1,0 +1,34 @@
+# Pins that can be controlled via pyserial
+
+    Step and Direction Pins: -> stepper.py
+        X Axis: Step (XSTEP), Direction (XDIR) -> (XSTEP, XDIR)
+        Y Axis: Step (YSTEP), Direction (YDIR) -> (YSTEP, YDIR)
+        Z Axis: Step (ZSTEP), Direction (ZDIR) -> (ZSTEP, ZDIR)
+        A Axis: Step (ASTEP), Direction (ADIR) -> (ASTEP, ADIR)
+
+    Limit Switch Pins:
+        X Axis: X- Limit (XMIN), X+ Limit (XMAX) -> (XLIMMIN, XLIMMAX)
+        Y Axis: Y- Limit (YMIN), Y+ Limit (YMAX) -> (YLIMMIN, YLIMYMAX)
+        Z Axis: Z- Limit (ZMIN), Z+ Limit (ZMAX) -> (ZLIMMIN, ZLIMMAX)
+
+    Spindle Control Pins:
+        Spindle Enable (SPN_EN) -> (SPN_EN)
+        Spindle Direction (SPN_DIR) -> (SPN_DIR)
+        Spindle PWM (SPN_PWM) -> (SPN_PWM)
+    
+    Solenoid Control Pins:
+        Solenoid Enable (COOL_EN) -> (COOL_EN)
+
+    Endstop Pins:
+        X Axis: X- Endstop (XMIN), X+ Endstop (XMAX) -> (XENDMIN, XENDMAX)
+        Y Axis: Y- Endstop (YMIN), Y+ Endstop (YMAX) -> (YENDMMIN, YENDMAX)
+        Z Axis: Z- Endstop (ZMIN), Z+ Endstop (ZMAX) -> (ZENDMIN, ZENDMAX)
+
+    Probe Pin:
+        Probe (PROBE) -> (PROBE)
+
+    Auxiliary Pins:
+        Enable 2 (EN2) -> (EN2)
+        Enable 3 (EN3) -> (EN3)
+
+# Eric: I have 1 PWM and 4 digital pins leftover

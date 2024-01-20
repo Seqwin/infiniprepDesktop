@@ -10,7 +10,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Modules.serial_communication import communicate_with_arduino
-import time
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
