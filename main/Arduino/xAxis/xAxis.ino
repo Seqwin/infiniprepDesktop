@@ -1,35 +1,62 @@
 #include <AccelStepper.h>
 
 // Define motor interface type and pins used for the motor driver
-#define motorInterfaceType 1 // For A4988 or similar driver, this is usually set to 1
-#define stepPin 2 // Connect this to the step pin on the CNC shield
-#define dirPin 5  // Connect this to the direction pin on the CNC shield
+#define motorInterfaceType 1
+#define stepPin 2
+#define dirPin 5
 
 // Initialize the AccelStepper library
 AccelStepper stepper(motorInterfaceType, stepPin, dirPin);
 
-void setup() {
-  Serial.begin(9600); // Start serial communication at 9600 bauds
-  
-  // Set the maximum speed and acceleration of the motor.
-  stepper.setMaxSpeed(10000); // Maximum steps per second, adjust as needed
-  stepper.setAcceleration(500); // Steps per second per second, adjust as needed
+void setup()
+{
+  Serial.begin(9600);
+  while (!Serial)
+    ; // Wait for serial port to connect
 
-  // Move to the initial position, which is 0 in this case
-  stepper.moveTo(0);
+  stepper.setMaxSpeed(1000);
+  stepper.setAcceleration(500);
 }
 
-void loop() {
-  // Continuously moves the motor towards the target position
-  stepper.run();
+void loop()
+{
+  if (Serial.available() > 0)
+  {
+    String command = Serial.readStringUntil('\n');
 
-  // Check if the stepper has reached its target position
-
-    // If the current position is 0, move to 123. Otherwise, move to 0.
-  if (stepper.currentPosition() == 0) {
-    stepper.moveTo(1000); // Move from 0 to 123
-  } else if (stepper.currentPosition() == 1000) {
-    stepper.moveTo(0); // Move from 123 back to 0
+    if (command.startsWith("SPEED "))
+    {
+      int speed = command.substring(6).toInt();
+      stepper.setMaxSpeed(speed);
+      Serial.println("Speed set");
+    }
+    else if (command.startsWith("ACCEL "))
+    {
+      int acceleration = command.substring(6).toInt();
+      stepper.setAcceleration(acceleration);
+      Serial.println("Acceleration set");
+    }
+    else if (command.startsWith("MOVE "))
+    {
+      long steps = command.substring(5).toInt();
+      stepper.moveTo(steps);
+      Serial.println("Moving");
+    }
+    else if (command.startsWith("DIR "))
+    {
+      int direction = command.substring(4).toInt();
+      long currentPosition = stepper.currentPosition(); // Get current position
+      // Set the direction by moving to a position relative to the current one
+      if (direction == 1)
+      {
+        stepper.moveTo(currentPosition + 10000); // Arbitrary large number for continuous movement
+      }
+      else if (direction == -1)
+      {
+        stepper.moveTo(currentPosition - 10000); // Move in the opposite direction
+      }
+      Serial.println("Direction set");
+    }
   }
-
+  stepper.run();
 }
