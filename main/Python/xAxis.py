@@ -3,9 +3,8 @@ from tkinter import messagebox
 import serial
 import threading
 
-# Try to establish a serial connection
 try:
-    ser = serial.Serial('COM7', 9600, timeout=1)
+    ser = serial.Serial('COM7', 9600, timeout=1)  # Adjust your COM port here
 except serial.SerialException:
     messagebox.showerror("Serial Connection Error", "Could not open port COM7. Check your connection and try again.")
     exit()
@@ -33,7 +32,6 @@ def send_parameters():
     
     messagebox.showinfo("Info", "Commands sent")
 
-# GUI setup
 root = tk.Tk()
 root.title("Stepper Motor Controller")
 
