@@ -4,7 +4,7 @@ import serial
 import threading
 
 try:
-    ser = serial.Serial('COM7', 9600, timeout=1)  # Adjust your COM port here
+    ser = serial.Serial('COM7', 9600, timeout=1)  # Adjust the COM port as needed
 except serial.SerialException:
     messagebox.showerror("Serial Connection Error", "Could not open port COM7. Check your connection and try again.")
     exit()
@@ -20,17 +20,20 @@ def listen_for_limit_switch():
                 status_box.config(bg="red")
             elif line == "LIMIT_RELEASED":
                 status_box.config(bg="green")
+            elif line == "HOMED":
+                messagebox.showinfo("Homing Complete", "The stepper motor has been homed successfully.")
 
 def send_parameters():
     speed = speed_entry.get()
     acceleration = acceleration_entry.get()
     steps = steps_entry.get()
-    
     send_command(f"SPEED {speed}")
     send_command(f"ACCEL {acceleration}")
     send_command(f"MOVE {steps}")
-    
     messagebox.showinfo("Info", "Commands sent")
+
+def home_system():
+    send_command("HOME")
 
 root = tk.Tk()
 root.title("Stepper Motor Controller")
@@ -50,10 +53,12 @@ steps_entry.grid(row=2, column=1)
 send_button = tk.Button(root, text="Send Commands", command=send_parameters)
 send_button.grid(row=3, column=0, columnspan=2)
 
-status_box = tk.Label(root, text="Limit Switch Status", bg="green")
-status_box.grid(row=4, column=0, columnspan=2, sticky="ew")
+home_button = tk.Button(root, text="Home", command=home_system)
+home_button.grid(row=4, column=0, columnspan=2)
 
-# Start the thread to listen for limit switch status updates
+status_box = tk.Label(root, text="Limit Switch Status", bg="green")
+status_box.grid(row=5, column=0, columnspan=2, sticky="ew")
+
 threading.Thread(target=listen_for_limit_switch, daemon=True).start()
 
 root.mainloop()
