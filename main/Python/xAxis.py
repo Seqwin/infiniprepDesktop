@@ -16,12 +16,10 @@ def listen_for_limit_switch():
     while True:
         if ser.in_waiting > 0:
             line = ser.readline().decode().strip()
-            if line == "LIMIT_PRESSED":
-                status_box.config(bg="red")
-            elif line == "LIMIT_RELEASED":
+            if line == "HOME":
                 status_box.config(bg="green")
-            elif line == "HOMED":
-                messagebox.showinfo("Homing Complete", "The stepper motor has been homed successfully.")
+            elif line == "NOT_HOME":
+                status_box.config(bg="red")
 
 def send_parameters():
     speed = speed_entry.get()
@@ -56,9 +54,10 @@ send_button.grid(row=3, column=0, columnspan=2)
 home_button = tk.Button(root, text="Home", command=home_system)
 home_button.grid(row=4, column=0, columnspan=2)
 
-status_box = tk.Label(root, text="Limit Switch Status", bg="green")
+status_box = tk.Label(root, text="Homed Status", bg="red")
 status_box.grid(row=5, column=0, columnspan=2, sticky="ew")
 
+# Start the thread to listen for limit switch status updates
 threading.Thread(target=listen_for_limit_switch, daemon=True).start()
 
 root.mainloop()
