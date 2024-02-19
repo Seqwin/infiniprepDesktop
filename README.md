@@ -1,0 +1,4 @@
+- 👋 Hi, I’m @Seqwin
+- 👀 I’m interested in creating an open-source platform for automating DNA, RNA, and Protein assays.
+- 🌱 I’m currently learning how to develop an AI-assisted protocol generator.
+- 📫 How to reach me: Email me at seqwinfounders@gmail.com
