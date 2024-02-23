@@ -33,7 +33,7 @@ void loop()
       Serial.println("HOME");        // Send homing completion message
       stepper.stop();                // Stop the stepper motor
       stepper.setCurrentPosition(0); // Set the current position as 0 (home)
-      stepper.moveTo(24);            // Ensure the stepper is stopped
+      stepper.moveTo(50);            // Ensure the stepper is stopped
       isHoming = false;              // Exit homing mode
     }
     stepper.run(); // Continuously run the stepper motor towards the home position
