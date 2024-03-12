@@ -1,74 +1,90 @@
 #include <AccelStepper.h>
+#include <Encoder.h>
 
-// Define motor interface type and pin connections
 #define motorInterfaceType 1
 #define stepPin 2
 #define dirPin 5
 #define limitSwitchPin 9
+#define encoderPinA 18
+#define encoderPinB 19
 
-// Initialize the AccelStepper library
 AccelStepper stepper(motorInterfaceType, stepPin, dirPin);
+Encoder myEnc(encoderPinA, encoderPinB);
 
-bool isHoming = false; // Flag to indicate if the system is currently in the homing process
+bool isHoming = false;
+unsigned long lastEncoderRead = 0;
+const unsigned long encoderReadInterval = 100; // Interval to read the encoder (ms)
 
 void setup()
 {
-  Serial.begin(9600);                    // Start serial communication at 9600 baud
-  pinMode(limitSwitchPin, INPUT_PULLUP); // Configure the limit switch pin as input with pull-up resistor
-
-  // Set initial speed and acceleration:
-  stepper.setMaxSpeed(1000);    // steps per second
-  stepper.setAcceleration(500); // steps per second squared
+  Serial.begin(9600);
+  pinMode(limitSwitchPin, INPUT_PULLUP);
+  stepper.setMaxSpeed(1000);    // Default max speed, will be adjusted for homing
+  stepper.setAcceleration(500); // Default acceleration, will be adjusted for homing
 }
 
 void loop()
 {
-  // Homing process logic
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastEncoderRead > encoderReadInterval)
+  {
+    long position = myEnc.read();
+    Serial.print("Position: ");
+    Serial.println(position);
+    lastEncoderRead = currentMillis;
+  }
 
   if (isHoming)
   {
-    // Perform homing by moving the stepper until the limit switch is triggered
+    // Check if limit switch is pressed
     if (digitalRead(limitSwitchPin) == LOW)
-    {                                // Check if limit switch is pressed
-      Serial.println("HOME");        // Send homing completion message
-      stepper.stop();                // Stop the stepper motor
-      stepper.setCurrentPosition(0); // Set the current position as 0 (home)
-      stepper.moveTo(50);            // Ensure the stepper is stopped
-      isHoming = false;              // Exit homing mode
+    {
+      stepper.setCurrentPosition(0); // Reset stepper position to 0
+      stepper.stop();                // Stop the stepper
+      stepper.move(20);              // Move a bit to ensure the limit switch is reset
+      while (stepper.distanceToGo() != 0)
+      {
+        stepper.run();
+      }
+      delay(1000);    // Wait for 1 second
+      myEnc.write(0); // Then reset encoder position to 0
+      isHoming = false;
+      Serial.println("HOMED");
+      // Restore default speed and acceleration after homing
+      stepper.setMaxSpeed(1000);
+      stepper.setAcceleration(500);
     }
-    stepper.run(); // Continuously run the stepper motor towards the home position
-    return;        // Skip the rest of the loop while homing
+    else
+    {
+      stepper.run();
+    }
+    return;
   }
-
-  // Regular operation for handling serial commands
-  if (Serial.available() > 0)
+  // Process serial commands
+  while (Serial.available() > 0)
   {
-    String command = Serial.readStringUntil('\n'); // Read the incoming command
-
+    String command = Serial.readStringUntil('\n');
     if (command == "HOME")
     {
-      isHoming = true;              // Set the homing flag
-      stepper.moveTo(-1000000);     // Move stepper to trigger limit switch, adjust as necessary
-      stepper.setMaxSpeed(200);     // Use a lower speed for homing
-      stepper.setAcceleration(100); // Use a lower acceleration for homing
+      isHoming = true;
+      stepper.moveTo(-1000000);     // Move to trigger the limit switch
+      stepper.setMaxSpeed(500);     // Set homing speed
+      stepper.setAcceleration(500); // Set homing acceleration
     }
     else if (command.startsWith("SPEED "))
     {
-      stepper.setMaxSpeed(command.substring(6).toInt()); // Set max speed
-      Serial.println("NOT_HOME");                        // ERIC ADDED**************************
+      stepper.setMaxSpeed(command.substring(6).toInt());
     }
     else if (command.startsWith("ACCEL "))
     {
-      stepper.setAcceleration(command.substring(6).toInt()); // Set acceleration
-      Serial.println("NOT_HOME");                            // ERIC ADDED**************************
+      stepper.setAcceleration(command.substring(6).toInt());
     }
     else if (command.startsWith("MOVE "))
     {
-      long steps = command.substring(5).toInt(); // Parse the number of steps to move
-      stepper.move(steps);                       // Move the stepper a relative distance
-      Serial.println("NOT_HOME");                // ERIC ADDED**************************
+      stepper.move(command.substring(5).toInt());
     }
   }
 
-  stepper.run(); // Execute step movement
+  if (!isHoming)
+    stepper.run();
 }

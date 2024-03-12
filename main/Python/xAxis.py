@@ -16,10 +16,13 @@ def listen_for_limit_switch():
     while True:
         if ser.in_waiting > 0:
             line = ser.readline().decode().strip()
-            if line == "HOME":
-                status_box.config(bg="green")
+            if line.startswith("Position:"):
+                position = line.split(":")[1]
+                encoder_status_box.config(text=f"Encoder Position: {position}")
+            elif line == "HOME":
+                status_box.config(bg="green", text="Homed Status: HOME")
             elif line == "NOT_HOME":
-                status_box.config(bg="red")
+                status_box.config(bg="red", text="Homed Status: NOT HOME")
 
 def send_parameters():
     speed = speed_entry.get()
@@ -54,10 +57,12 @@ send_button.grid(row=3, column=0, columnspan=2)
 home_button = tk.Button(root, text="Home", command=home_system)
 home_button.grid(row=4, column=0, columnspan=2)
 
-status_box = tk.Label(root, text="Homed Status", bg="red")
-status_box.grid(row=5, column=0, columnspan=2, sticky="ew")
+status_box = tk.Label(root, text="Homed Status: NOT HOME", bg="red")
+status_box.grid(row=5, column=0, columnspan=2)
 
-# Start the thread to listen for limit switch status updates
+encoder_status_box = tk.Label(root, text="Encoder Position: 0")
+encoder_status_box.grid(row=6, column=0, columnspan=2)
+
 threading.Thread(target=listen_for_limit_switch, daemon=True).start()
 
 root.mainloop()
